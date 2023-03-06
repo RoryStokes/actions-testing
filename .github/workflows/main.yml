@@ -1,0 +1,43 @@
+# Main file that orchestrate the CI/CD of the project.
+name: Main CI/CD
+
+# Runs on main branch push (for deployment) and PR open/reopen for verification.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      source-branch:
+        default: main
+        description: "The git branch to deploy from"
+        required: true
+      target-env:
+        required: true
+        description: "The environment to deploy to"
+        type: environment
+
+jobs:
+  derive-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      source-branch: ${{ steps.source-branch.outputs.value }}
+      target-env: ${{ steps.target-env.outputs.value }}
+    steps:
+      - id: source-branch
+        run: |
+          export SOURCE_BRANCH_INPUT="${{ inputs.source-branch }}"
+          echo "value=${SOURCE_BRANCH_INPUT:-main}" >> "$GITHUB_OUTPUT"
+      - id: target-env
+        run: |
+          export TARGET_ENV_INPUT="${{ inputs.target-env }}"
+          echo "value=${TARGET_ENV_INPUT:-dev}" >> "$GITHUB_OUTPUT"
+  test-job:
+    uses: ./.github/workflows/test-job.yml
+    needs: ["derive-inputs"]
+    with:
+      target-env: ${{ needs.derive-inputs.outputs.target-env }}
+      source-branch: ${{ needs.derive-inputs.outputs.source-branch }}
+    secrets: inherit
