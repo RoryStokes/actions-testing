@@ -10,10 +10,6 @@ on:
     types: [opened, reopened, synchronize]
   workflow_dispatch:
     inputs:
-      source-branch:
-        default: main
-        description: "The git branch to deploy from"
-        required: true
       target-env:
         required: true
         description: "The environment to deploy to"

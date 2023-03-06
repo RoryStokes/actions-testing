@@ -1,4 +1,4 @@
-name: Greeting Action
+name: A job in my workflow
 on:
   workflow_call:
     inputs:
@@ -13,6 +13,7 @@ on:
         default: main
 jobs:
   say-hello:
+    name: Deploy to ${{ inputs.target-env }}
     runs-on: ubuntu-latest
     steps:
       - run: echo "Env ${{ inputs.target-env }}, branch ${{ inputs.source-branch }}"
